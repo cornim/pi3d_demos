@@ -72,7 +72,7 @@ def tex_load(pic_num, iFiles, size=None):
       im = Image.open(fname)
     if config.DELAY_EXIF and type(pic_num) is int: # don't do this if passed a file name
       if iFiles[pic_num][3] is None or iFiles[pic_num][4] is None: # dt and fdt set to None before exif read
-        (orientation, dt, fdt, location) = get_exif_info(fname, im)
+        (orientation, dt, fdt, location, rating) = get_exif_info(fname, im)
         iFiles[pic_num][1] = orientation
         iFiles[pic_num][3] = dt
         iFiles[pic_num][4] = fdt
@@ -177,8 +177,10 @@ def get_files(dt_from=None, dt_to=None):
               fdt = None
               location = ""
               if not config.DELAY_EXIF and EXIF_DATID is not None and EXIF_ORIENTATION is not None:
-                (orientation, dt, fdt, location) = get_exif_info(file_path_name)
+                (orientation, dt, fdt, location, rating) = get_exif_info(file_path_name)
                 if (dt_from is not None and dt < dt_from) or (dt_to is not None and dt > dt_to):
+                  include_flag = False
+                if rating is None or rating < 4:
                   include_flag = False
               if include_flag:
                 # iFiles now list of lists [file_name, orientation, file_changed_date, exif_date, exif_formatted_date]
@@ -213,13 +215,15 @@ def get_exif_info(file_path_name, im=None):
         dt = time.mktime(exif_dt)
     if EXIF_ORIENTATION in exif_data:
         orientation = int(exif_data[EXIF_ORIENTATION])
+    if EXIF_RATING in exif_data:
+        rating = int(exif_data[EXIF_RATING])
     if config.LOAD_GEOLOC and geo.EXIF_GPSINFO in exif_data:
       location = geo.get_location(exif_data[geo.EXIF_GPSINFO])
   except Exception as e: # NB should really check error here but it's almost certainly due to lack of exif data
     if config.VERBOSE:
       print('trying to read exif', e)
   fdt = time.strftime(config.SHOW_TEXT_FM, time.localtime(dt))
-  return (orientation, dt, fdt, location)
+  return (orientation, dt, fdt, location, rating)
 
 def convert_heif(fname):
     try:
@@ -240,6 +244,8 @@ for k in ExifTags.TAGS:
     EXIF_DATID = k
   if ExifTags.TAGS[k] == 'Orientation':
     EXIF_ORIENTATION = k
+  if ExifTags.TAGS[k] == 'Rating':
+    EXIF_RATING = k
 
 if config.LOAD_GEOLOC:
   import PictureFrame2020geo as geo
