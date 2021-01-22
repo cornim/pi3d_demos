@@ -83,6 +83,8 @@ def tex_load(pic_num, iFiles, size=None):
       if date_to is not None:
         if dt > time.mktime(date_to + (0, 0, 0, 0, 0, 0)):
           return None
+      if (config.MIN_RATING and (rating is None or rating < config.MIN_RATING)) or (config.MAX_RATING and (rating is None or rating > config.MAX_RATING)):
+        return None 
     (w, h) = im.size
     max_dimension = MAX_SIZE # TODO changing MAX_SIZE causes serious crash on linux laptop!
     if not config.AUTO_RESIZE: # turned off for 4K display - will cause issues on RPi before v4
@@ -176,12 +178,13 @@ def get_files(dt_from=None, dt_to=None):
               dt = None # if exif data not read - used for checking in tex_load
               fdt = None
               location = ""
-              if not config.DELAY_EXIF and EXIF_DATID is not None and EXIF_ORIENTATION is not None:
+              if not config.DELAY_EXIF:
                 (orientation, dt, fdt, location, rating) = get_exif_info(file_path_name)
-                if (dt_from is not None and dt < dt_from) or (dt_to is not None and dt > dt_to):
-                  include_flag = False
-                if rating is None or rating < 4:
-                  include_flag = False
+                if EXIF_DATID is not None and EXIF_ORIENTATION is not None:
+                  if (dt_from is not None and dt < dt_from) or (dt_to is not None and dt > dt_to):
+                    include_flag = False
+                if (config.MIN_RATING and (rating is None or rating < config.MIN_RATING)) or (config.MAX_RATING and (rating is None or rating > config.MAX_RATING)):
+                    include_flag = False
               if include_flag:
                 # iFiles now list of lists [file_name, orientation, file_changed_date, exif_date, exif_formatted_date]
                 file_list.append([file_path_name,

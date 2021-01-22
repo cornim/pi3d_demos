@@ -70,6 +70,8 @@ parse.add_argument(      "--display_x",     default=0, type=int, help="offset fr
 parse.add_argument(      "--display_y",     default=0, type=int, help="offset from top of screen (can be negative)")
 parse.add_argument(      "--display_w",     default=None, type=int, help="width of display surface (None will use max returned by hardware)")
 parse.add_argument(      "--display_h",     default=None, type=int, help="height of display surface")
+parse.add_argument(      "--min_rating",    default=None, type=int, help="Minimum rating of displayed pictures")
+parse.add_argument(      "--max_rating",    default=None, type=int, help="Maximum rating of displayed pictures")
 args = parse.parse_args()
 print(args.display_x)
 
@@ -118,6 +120,8 @@ DISPLAY_X = args.display_x
 DISPLAY_Y = args.display_y
 DISPLAY_W = args.display_w
 DISPLAY_H = args.display_h
+MIN_RATING = args.min_rating
+MAX_RATING = args.max_rating
 
 
 CODEPOINTS = '1234567890AÄÀBCÇDÈÉÊEFGHIÍJKLMNÑOÓÖPQRSTUÚÙÜVWXYZ., _-/abcdefghijklmnñopqrstuvwxyzáéèêàçíóúäöüß' # limit to 49 ie 7x7 grid_size
